@@ -5,7 +5,6 @@ import os
 from tqdm import tqdm
 from cv2 import imwrite
 
-
 class ImageAugmentor():
 
     def __init__(self, compose=None, keypoint_format='xy', remove_invisible=False):
@@ -67,7 +66,7 @@ class ImageAugmentor():
 
     def augment_from_dir(self, image_dir: str, label_dir: str, output_dir: str, num_variant: int=10):
         image_names = os.listdir(image_dir)
-        progress_bar = tqdm(image_names, total=len(image_names), desc= f"Augmentation Process", leave=False)
+        progress_bar = tqdm(image_names, total=len(image_names), desc= f"Augmentation Process", leave=True)
         for img_name in progress_bar:
             name_list = img_name.split('.')
             image_format = name_list[-1]
@@ -75,6 +74,19 @@ class ImageAugmentor():
             img = dtils.read_image(os.path.join(image_dir, f"{base_filename}.{image_format}"))
             img = dtils.convert_to_rgb(img)
             lbl = dtils.read_label(os.path.join(label_dir,f"{base_filename}.txt"))
+            if not lbl.strip():
+                print(f"Skipping {img_name} as it has an empty label file.")
+                continue
+            label_lines = lbl.split("\n")
+            valid_format = True
+            for line in label_lines:
+                parts = line.split()
+                if len(parts) != 5:
+                    print(f"Skipping {img_name} as it has an invalid label format.")
+                    valid_format = False
+                    break
+            if not valid_format:
+                continue
             self.augment_and_save(
                 image=img, labels=lbl,
                 output_dir=output_dir,
