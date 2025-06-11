@@ -2,7 +2,7 @@ import albumentations as A
 import services.data_handler.utils as dtils
 import numpy as np
 import os
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 from cv2 import imwrite
 
 class ImageAugmentor():
